@@ -1,0 +1,72 @@
+#Divya
+# Import necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load the dataset
+dataset_path = "/content/drive/MyDrive/datasets/Iris.csv"
+iris_df = pd.read_csv(dataset_path)
+
+# Drop the "Id" column
+iris_df.drop('Id', axis=1, inplace=True)
+
+# Display basic information about the dataset
+print("Dataset Information:")
+print(iris_df.info())
+
+# Display statistical summary of the dataset
+print("\nStatistical Summary:")
+print(iris_df.describe())
+
+# Display the distribution of target variable 'Species'
+plt.figure(figsize=(8, 6))
+sns.countplot(x='Species', data=iris_df)
+plt.title('Distribution of Iris Species')
+plt.show()
+
+# Visualize the correlation matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(iris_df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Correlation Matrix')
+plt.show()
+
+# Separate features (X) and target variable (y)
+features = iris_df.drop('Species', axis=1)
+target = iris_df['Species']
+
+# Split the dataset into training and testing sets
+features_train, features_test, target_train, target_test = train_test_split(features, target, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+features_train_std = scaler.fit_transform(features_train)
+features_test_std = scaler.transform(features_test)
+
+# Create and train the model (Random Forest Classifier in this case)
+random_forest_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+random_forest_classifier.fit(features_train_std, target_train)
+
+# Make predictions on the test set
+target_pred = random_forest_classifier.predict(features_test_std)
+
+# Evaluate the model
+accuracy = accuracy_score(target_test, target_pred)
+conf_matrix = confusion_matrix(target_test, target_pred)
+classification_rep = classification_report(target_test, target_pred)
+
+# Display the results
+print(f"\nAccuracy: {accuracy}")
+print("\nConfusion Matrix:")
+print(conf_matrix)
+print("\nClassification Report:")
+print(classification_rep)
+
+# Cross-validation to assess the model's performance
+cv_scores = cross_val_score(random_forest_classifier, features, target, cv=5)
+print(f"\nCross-Validation Scores: {cv_scores}")
+print(f"Mean Cross-Validation Score: {cv_scores.mean()}")
